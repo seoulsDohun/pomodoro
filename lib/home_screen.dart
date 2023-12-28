@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -10,6 +12,34 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
+    int totalSeconds = 1500;
+    bool isRunning = false;
+    late Timer timer;
+
+    void onTick(Timer timer) {
+      setState(() {
+        totalSeconds -= 1;
+      });
+    }
+
+    // 시작 버튼 클릭 이벤트
+    void onStartPressed() {
+      print('onStartPressed $isRunning');
+      setState(() {
+        isRunning = true;
+      });
+      timer = Timer.periodic(const Duration(seconds: 1), onTick);
+    }
+
+    // 정지 버튼 클릭 이벤트
+    void onPausePressed() {
+      print('onStopPressed');
+      timer.cancel();
+      setState(() {
+        isRunning = false;
+      });
+    }
+
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       body: Column(
@@ -19,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               alignment: Alignment.bottomCenter,
               child: Text(
-                '25:00',
+                '$totalSeconds',
                 style: TextStyle(
                   fontSize: 80,
                   fontWeight: FontWeight.w600,
@@ -34,9 +64,11 @@ class _HomeScreenState extends State<HomeScreen> {
               child: IconButton(
                 iconSize: 120,
                 color: Theme.of(context).cardColor,
-                onPressed: () {},
-                icon: const Icon(
-                  Icons.play_circle_outline,
+                onPressed: isRunning ? onPausePressed : onStartPressed,
+                icon: Icon(
+                  isRunning
+                      ? Icons.pause_circle_outline
+                      : Icons.play_circle_outline,
                 ),
               ),
             ),
@@ -49,6 +81,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Theme.of(context).cardColor,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(30),
+                      ),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
