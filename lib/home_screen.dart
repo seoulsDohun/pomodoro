@@ -10,14 +10,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int totalSeconds = 1500;
+  static const twentyFiveMin = 1500;
+  int totalSeconds = twentyFiveMin;
+  int totalPomodoro = 0;
   bool isRunning = false;
   late Timer timer;
 
   void onTick(Timer timer) {
-    setState(() {
-      totalSeconds -= 1;
-    });
+    if (totalSeconds == 0) {
+      setState(() {
+        totalSeconds = 1500;
+        isRunning = false;
+        totalPomodoro += 1;
+      });
+      timer.cancel();
+    } else {
+      setState(() {
+        totalSeconds -= 1;
+      });
+    }
   }
 
   // 시작 버튼 클릭 이벤트
@@ -33,8 +44,22 @@ class _HomeScreenState extends State<HomeScreen> {
     timer.cancel();
     setState(() {
       isRunning = false;
-      totalSeconds = 1500;
     });
+  }
+
+  // 리셋 버튼 클릭 이벤트
+  void onResetPressed() {
+    timer.cancel();
+    setState(() {
+      totalSeconds = twentyFiveMin;
+      totalPomodoro = 0;
+      isRunning = false;
+    });
+  }
+
+  // Date Format(초 -> 분:초)
+  String format(int seconds) {
+    return '${(seconds / 60).floor()}:${(seconds % 60).toString().padLeft(2, '0')}';
   }
 
   @override
@@ -48,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               alignment: Alignment.bottomCenter,
               child: Text(
-                '$totalSeconds',
+                format(totalSeconds),
                 style: TextStyle(
                   fontSize: 80,
                   fontWeight: FontWeight.w600,
@@ -60,15 +85,28 @@ class _HomeScreenState extends State<HomeScreen> {
           Flexible(
             flex: 2,
             child: Center(
-              child: IconButton(
-                iconSize: 120,
-                color: Theme.of(context).cardColor,
-                onPressed: isRunning ? onPausePressed : onStartPressed,
-                icon: Icon(
-                  isRunning
-                      ? Icons.pause_circle_outline
-                      : Icons.play_circle_outline,
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    iconSize: 120,
+                    color: Theme.of(context).cardColor,
+                    onPressed: isRunning ? onPausePressed : onStartPressed,
+                    icon: Icon(
+                      isRunning
+                          ? Icons.pause_circle_outline
+                          : Icons.play_circle_outline,
+                    ),
+                  ),
+                  IconButton(
+                    iconSize: 80,
+                    color: Theme.of(context).cardColor,
+                    onPressed: onResetPressed,
+                    icon: const Icon(
+                      Icons.stop_circle_outlined,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
